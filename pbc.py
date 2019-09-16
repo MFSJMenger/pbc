@@ -36,9 +36,10 @@ SOFTWARE.
 
 """
 from functools import wraps
+from abc import ABC, ABCMeta, abstractmethod
 
 
-__all__ = ['protectmethod', 'PBC']
+__all__ = ['PBC', 'protectmethod', 'ABC', 'abstractmethod']
 
 
 class ProtectedFunction(Exception):
@@ -62,13 +63,13 @@ def _pbc_protect_setter(funcobj):
     return _setter
 
 
-class PBCMeta(type):
+class PBCMeta(ABCMeta):
     """Metaclass for defining Protected Base Classes (PBCs).
     Use this metaclass to create an PBC.  An PBC can be subclassed
     directly, and then acts as a mix-in class. 
     """
 
-    def __new__(self, name, bases, ns, *args, **kwargs):
+    def __new__(self, clsname, bases, ns, *args, **kwargs):
 
         ns['_pbc__protected_functions__'] = []
 
@@ -93,7 +94,8 @@ class PBCMeta(type):
                 if getattr(obj, '_pbc__isprotected__', False) is True:
                     ns['_pbc__protected_functions__'].append(name)
 
-        return type.__new__(self, name, bases, ns, *args, **kwargs)
+        return ABCMeta.__new__(self, clsname, bases, ns, *args, **kwargs)
+
 
 class PBC(metaclass=PBCMeta):
     """Helper class that provides a standard way to create an PBC using
